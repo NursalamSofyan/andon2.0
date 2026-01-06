@@ -1,0 +1,150 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "./generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// --- USER & AUTHENTICATION ---
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String?   @unique
+  password      String?
+  emailVerified DateTime?
+  image         String?
+  domain        String?   @unique // Hanya diisi oleh ADMIN untuk subdomain
+  status        String    @default("pending") // Hapus @default("pending") jika ingin null
+  role          String    @default("ADMIN") // "ADMIN" atau "TEAM"
+
+  accounts      Account[]
+  sessions      Session[]
+
+  // Relasi Keanggotaan Tim
+  team_as_admin  TeamMember[] @relation("AdminToTeam")
+  team_as_member TeamMember[] @relation("MemberToAdmin")
+  
+  // Relasi Operasional
+  locations      Location[]   @relation("AdminToLocation")
+  callsHandled   Call[]       @relation("UserCalls") // Teknisi yang menangani panggilan
+  
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@index([userId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@index([userId])
+}
+
+// --- ORGANIZATION STRUCTURE ---
+model TeamMember {
+  id           String  @id @default(cuid())
+  adminId      String  // ID Admin pemilik organisasi/subdomain
+  memberId     String  // ID User anggota tim
+  role         String  // "MEKANIK", "QUALITY", "PRODUCTION", dll (Hapus nullable)
+  lastPassword String?
+
+  admin  User @relation("AdminToTeam", fields: [adminId], references: [id], onDelete: Cascade)
+  member User @relation("MemberToAdmin", fields: [memberId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([adminId, memberId])
+  @@index([adminId])
+  @@index([memberId])
+  @@index([role])
+}
+
+model Location {
+  id        String    @id @default(cuid())
+  name      String
+  adminId   String
+  admin     User      @relation("AdminToLocation", fields: [adminId], references: [id], onDelete: Cascade)
+  machines  Machine[] 
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  @@unique([adminId, name])
+  @@index([adminId])
+}
+
+model Machine {
+  id         String   @id @default(cuid())
+  name       String
+  locationId String
+  location   Location @relation(fields: [locationId], references: [id], onDelete: Cascade)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  
+  // Riwayat Panggilan Mesin
+  calls      Call[]
+
+  @@unique([locationId, name])
+  @@index([locationId])
+}
+
+// --- ANDON SYSTEM (CALL MANAGEMENT) ---
+enum CallStatus {
+  OPEN
+  IN_PROGRESS
+  CLOSED
+}
+
+model Call {
+  id            String     @id @default(cuid())
+  machineId     String
+  machine       Machine    @relation(fields: [machineId], references: [id], onDelete: Cascade)
+  
+  requestedRole String     // Role yang dipanggil (Contoh: "QUALITY")
+  status        CallStatus @default(OPEN) // Gunakan enum untuk konsistensi
+  note          String?    @db.Text
+  
+  // Siapa yang merespon panggilan ini
+  responderId   String?
+  responder     User?      @relation("UserCalls", fields: [responderId], references: [id], onDelete: SetNull)
+
+  // Lokasi saat panggilan dibuat (opsional untuk tracking)
+  latitude      Float?
+  longitude     Float?
+
+  // Timeline untuk Analisa OEE/Downtime
+  createdAt     DateTime   @default(now())   // Waktu Tombol Ditekan
+  acceptedAt    DateTime?                    // Waktu Teknisi Klik "Accept"
+  closedAt      DateTime?                    // Waktu Masalah Selesai
+  updatedAt     DateTime   @updatedAt
+
+  @@index([machineId])
+  @@index([status])
+  @@index([requestedRole])
+  @@index([responderId])
+  @@index([createdAt])
+}
