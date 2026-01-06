@@ -60,7 +60,7 @@ export default function PrintQRClient({
                 />
               </div> */}
               <div className="p-2 border-4 border-black rounded-xl">
-              <QRGenerator loginUrl={loginUrl} machineId={mac.id}/>
+              <QRGenerator subdomain={loginUrl} machineId={mac.id}/>
               </div>
 
 
