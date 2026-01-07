@@ -2,135 +2,151 @@
 
 import { useEffect, useState } from "react"
 import { getDashboardStats } from "@/app/actions/dashboard-actions"
-import { format, differenceInSeconds } from "date-fns"
-import { FaClock, FaExclamationTriangle, FaCheckCircle, FaTools } from "react-icons/fa"
+import { format } from "date-fns"
+import { FaClock, FaExclamationTriangle, FaCheckCircle, FaTools, FaBroadcastTower } from "react-icons/fa"
 
 export default function RealtimeMonitor({ domain }: { domain: string }) {
     const [data, setData] = useState<any>(null)
     const [currentTime, setCurrentTime] = useState(new Date())
 
-    // Clock Ticker
     useEffect(() => {
-        const timer = setInterval(() => setCurrentTime(new Date()), 2000)
+        const timer = setInterval(() => setCurrentTime(new Date()), 1000)
         return () => clearInterval(timer)
     }, [])
 
-    // Data Polling
     useEffect(() => {
         const fetchData = async () => {
             const res = await getDashboardStats(domain)
-            if (res.success) {
-                setData(res.data)
-            }
+            if (res.success) setData(res.data)
         }
         fetchData()
-        const interval = setInterval(fetchData, 5000) // Poll every 5s
+        const interval = setInterval(fetchData, 5000)
         return () => clearInterval(interval)
     }, [domain])
 
     if (!data) return (
-        <div className="flex items-center justify-center h-full text-2xl text-muted-foreground animate-pulse">
-            Connecting to {domain} Andon System...
+        <div className="flex flex-col items-center justify-center h-full gap-4 text-slate-500 bg-slate-950">
+            <FaBroadcastTower className="text-6xl animate-pulse text-blue-500" />
+            <h2 className="text-xl font-black uppercase tracking-[0.3em] animate-pulse">Syncing Andon Node...</h2>
         </div>
     )
 
-    const activeColor = (status: string) => {
-        return status === 'IN_PROGRESS'
-            ? "bg-amber-100 border-amber-300 text-amber-900"
-            : "bg-rose-100 border-rose-300 text-rose-900 animate-pulse"
+    const getStatusStyles = (status: string) => {
+        if (status === 'IN_PROGRESS') {
+            return "bg-amber-500/10 border-amber-500 text-amber-500 shadow-[0_0_20px_rgba(245,158,11,0.2)]"
+        }
+        return "bg-rose-600/10 border-rose-600 text-rose-500 animate-pulse shadow-[0_0_30px_rgba(225,29,72,0.3)]"
     }
-    console.log(data)
 
     return (
-        <div className="flex flex-col h-full bg-background">
-            {/* Header */}
-            <div className="bg-primary text-primary-foreground p-6 shadow-md flex justify-between items-center rounded-xl mb-6">
-                <div>
-                    <h1 className="text-4xl font-black tracking-tight uppercase flex items-center gap-3">
-                        <span className="bg-white/20 p-2 rounded-lg"><FaTools /></span>
-                        {data.adminName} Andon
-                    </h1>
-                    <p className="text-primary-foreground/80 font-mono mt-1 text-lg">Live Production Monitor</p>
+        <div className="flex flex-col h-full bg-slate-950 text-slate-200">
+            {/* Header: High Visibility Clock */}
+            <div className="bg-slate-900 border-b border-slate-800 p-6 flex justify-between items-center shadow-2xl">
+                <div className="flex items-center gap-4">
+                    <div className="bg-blue-600 p-3 rounded-2xl shadow-lg shadow-blue-500/20">
+                        <FaTools className="text-white text-2xl" />
+                    </div>
+                    <div>
+                        <h1 className="text-2xl font-black italic tracking-tighter uppercase leading-none text-white">
+                            {data.adminName} <span className="text-blue-500">Node</span>
+                        </h1>
+                        <p className="text-[10px] font-black text-slate-500 uppercase tracking-[0.3em] mt-2 flex items-center gap-2">
+                            <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
+                            Live Telemetry Feed
+                        </p>
+                    </div>
                 </div>
+                
                 <div className="text-right">
-                    <div className="text-5xl font-mono font-bold tracking-widest">
+                    <div className="text-5xl font-mono font-black tracking-tighter text-white tabular-nums leading-none">
                         {format(currentTime, "HH:mm:ss")}
                     </div>
-                    <div className="text-xl opacity-90 uppercase tracking-widest">
-                        {format(currentTime, "EEEE, dd MMM yyyy")}
+                    <div className="text-[10px] font-black text-slate-500 uppercase tracking-widest mt-2">
+                        {format(currentTime, "EEEE, dd MMMM yyyy")}
                     </div>
                 </div>
             </div>
 
             {/* Grid Content */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 flex-1 overflow-y-auto p-1">
-
-                {/* Active Calls Cards */}
+            <div className="flex-1 overflow-y-auto p-6 custom-scrollbar">
                 {data.activeCalls.length === 0 ? (
-                    <div className="col-span-full flex flex-col items-center justify-center h-64 bg-green-50 border-2 border-green-200 border-dashed rounded-xl text-green-700">
-                        <FaCheckCircle className="text-6xl mb-4 opacity-50" />
-                        <h2 className="text-3xl font-bold">ALL SYSTEMS NORMAL</h2>
-                        <p className="text-lg opacity-80">No active calls at this moment.</p>
+                    <div className="h-full flex flex-col items-center justify-center border-2 border-slate-800 border-dashed rounded-[3rem] bg-slate-900/20">
+                        <div className="bg-green-500/10 p-8 rounded-full mb-6">
+                            <FaCheckCircle className="text-green-500 text-7xl opacity-80" />
+                        </div>
+                        <h2 className="text-4xl font-black italic text-slate-700 tracking-tighter uppercase">No Active Alerts</h2>
+                        <p className="text-slate-500 font-bold uppercase tracking-widest mt-2">All Production Lines Stable</p>
                     </div>
                 ) : (
-                    data.activeCalls.map((call: any) => (
-                        <div
-                            key={call.id}
-                            className={`rounded-xl border-l-[10px] p-6 shadow-lg flex flex-col justify-between h-[280px] relative overflow-hidden ${activeColor(call.status)}`}
-                        >
-                            <div className="absolute top-0 right-0 p-4 opacity-10">
-                                <FaExclamationTriangle size={150} />
-                            </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                        {data.activeCalls.map((call: any) => (
+                            <div
+                                key={call.id}
+                                className={`rounded-2xl border-2 p-6 flex flex-col justify-between h-80 relative overflow-hidden transition-all duration-500 ${getStatusStyles(call.status)}`}
+                            >
+                                {/* Decorative Icon */}
+                                <FaExclamationTriangle className="absolute -right-6 -top-6 text-current opacity-5 text-9xl rotate-12" />
 
-                            <div>
-                                <div className="flex justify-between items-start mb-2">
-                                    <span className="bg-black/10 px-3 py-1 rounded text-sm font-bold uppercase tracking-wider">
-                                        {call.status.replace('_', ' ')}
-                                    </span>
-                                    <span className="text-xs font-bold opacity-60">ID: {call.id.slice(-4)}</span>
+                                <div className="relative z-10">
+                                    <div className="flex justify-between items-center mb-6">
+                                        <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border ${call.status === 'IN_PROGRESS' ? 'border-amber-500/50' : 'border-rose-500/50 bg-rose-500 text-white'}`}>
+                                            {call.status.replace('_', ' ')}
+                                        </span>
+                                        <span className="font-mono text-[10px] opacity-50 font-bold">#ID-{call.id.slice(-4)}</span>
+                                    </div>
+
+                                    <h2 className="text-4xl font-black leading-none mb-1 tracking-tighter italic uppercase truncate">
+                                        {call.machine.name}
+                                    </h2>
+                                    <h3 className="text-sm font-bold opacity-60 uppercase tracking-wider mb-6">
+                                        Line: {call.machine.location.name}
+                                    </h3>
+
+                                    <div className="bg-white/5 p-4 rounded-2xl border border-white/10 backdrop-blur-md">
+                                        <p className="text-[9px] uppercase font-black opacity-50 mb-2 tracking-[0.2em]">Required Support</p>
+                                        <p className="text-xl font-black italic text-white uppercase">{call.requestedRole}</p>
+                                    </div>
                                 </div>
 
-                                <h2 className="text-4xl font-black leading-none mb-1">{call.machine.name}</h2>
-                                <h3 className="text-xl font-semibold opacity-75 mb-6">{call.machine.location.name}</h3>
-
-                                <div className="bg-white/30 p-3 rounded-lg backdrop-blur-sm">
-                                    <p className="text-xs uppercase font-bold opacity-60 mb-1">REQ SUPPORT</p>
-                                    <p className="text-2xl font-bold">{call.requestedRole}</p>
+                                <div className="mt-4 bg-slate-950/50 p-4 rounded-2xl border border-white/5">
+                                    <p className="text-[9px] uppercase font-black opacity-40 mb-1 text-center tracking-widest">Downtime Duration</p>
+                                    <DowntimeTimer startTime={call.createdAt} />
                                 </div>
-                            </div>
 
-                            <div className="bg-black/20 text-white p-4 rounded-lg text-center mt-4">
-                                <p className="text-xs uppercase font-bold opacity-70 mb-1">DOWNTIME</p>
-                                <DowntimeTimer startTime={call.createdAt} />
+                                {call.responder && (
+                                    <div className="mt-3 flex items-center gap-2 text-[10px] font-black uppercase tracking-tighter opacity-80">
+                                        <div className="w-1.5 h-1.5 bg-blue-500 rounded-full" />
+                                        Handling: {call.responder.name}
+                                    </div>
+                                )}
                             </div>
-
-                            {call.responder && (
-                                <div className="absolute bottom-2 right-4 text-xs font-bold opacity-80">
-                                    Handling: {call.responder.name}
-                                </div>
-                            )}
-                        </div>
-                    ))
+                        ))}
+                    </div>
                 )}
-
             </div>
 
-            {/* Footer Stats */}
-            <div className="mt-6 grid grid-cols-4 gap-6">
-                <StatCard label="Total Calls Today" value={data.stats.total} color="bg-card border-border text-foreground" />
-                <StatCard label="Resolved Today" value={data.stats.resolved} color="bg-green-100 border-green-300 text-green-900" />
-                <StatCard label="Active Issues" value={data.stats.open} color="bg-rose-100 border-rose-300 text-rose-900" />
-                <StatCard label="Efficiency" value={`${data.stats.total > 0 ? Math.round((data.stats.resolved / data.stats.total) * 100) : 100}%`} color="bg-blue-100 border-blue-300 text-blue-900" />
+            {/* Footer Stats Grid */}
+            <div className="p-6 bg-slate-900 border-t border-slate-800 grid grid-cols-2 lg:grid-cols-4 gap-4">
+                <StatCard label="Total (24h)" value={data.stats.total} theme="slate" />
+                <StatCard label="Resolved" value={data.stats.resolved} theme="green" />
+                <StatCard label="Active" value={data.stats.open} theme="rose" />
+                <StatCard label="OEE Efficiency" value={`${data.stats.total > 0 ? Math.round((data.stats.resolved / data.stats.total) * 100) : 100}%`} theme="blue" />
             </div>
         </div>
     )
 }
 
-function StatCard({ label, value, color }: { label: string, value: string | number, color: string }) {
+function StatCard({ label, value, theme }: { label: string, value: string | number, theme: string }) {
+    const themes: any = {
+        slate: "bg-slate-800/50 border-slate-700 text-slate-300",
+        green: "bg-green-500/10 border-green-500/20 text-green-500",
+        rose: "bg-rose-500/10 border-rose-500/20 text-rose-500",
+        blue: "bg-blue-500/10 border-blue-500/20 text-blue-400"
+    }
     return (
-        <div className={`p-4 rounded-xl border shadow-sm flex flex-col items-center justify-center ${color}`}>
-            <div className="text-3xl font-black">{value}</div>
-            <div className="text-xs font-bold uppercase tracking-widest opacity-70">{label}</div>
+        <div className={`p-4 rounded-2xl border transition-all duration-500 ${themes[theme]}`}>
+            <div className="text-3xl font-black italic tracking-tighter leading-none">{value}</div>
+            <div className="text-[9px] font-black uppercase tracking-[0.2em] mt-2 opacity-60">{label}</div>
         </div>
     )
 }
@@ -154,7 +170,7 @@ function DowntimeTimer({ startTime }: { startTime: string }) {
     const seconds = elapsed % 60
 
     return (
-        <div className="font-mono text-3xl font-bold tabular-nums">
+        <div className="font-mono text-3xl font-black tabular-nums text-white text-center leading-none tracking-tighter">
             {hours.toString().padStart(2, '0')}:
             {minutes.toString().padStart(2, '0')}:
             {seconds.toString().padStart(2, '0')}

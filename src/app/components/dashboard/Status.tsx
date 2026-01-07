@@ -1,115 +1,120 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { getDashboardStats, getAllStatus } from "@/app/actions/dashboard-actions"
-import { format, differenceInSeconds } from "date-fns"
-import { FaClock, FaExclamationTriangle, FaCheckCircle, FaTools } from "react-icons/fa"
+import { getAllStatus } from "@/app/actions/dashboard-actions"
+import { 
+  MdSettingsInputComponent, 
+  MdAnalytics, 
+  MdFiberManualRecord, 
+  MdMemory,
+  MdLocationOn
+} from "react-icons/md"
 
 export default function Status({ domain }: { domain: string }) {
     const [data, setData] = useState<any>(null)
-    const [currentTime, setCurrentTime] = useState(new Date())
 
-    // Clock Ticker
-    useEffect(() => {
-        const timer = setInterval(() => setCurrentTime(new Date()), 2000)
-        return () => clearInterval(timer)
-    }, [])
-
-    // Data Polling
     useEffect(() => {
         const fetchData = async () => {
             const res = await getAllStatus(domain)
             setData(res)
         }
         fetchData()
-        const interval = setInterval(fetchData, 5000) // Poll every 5s
+        const interval = setInterval(fetchData, 10000)
         return () => clearInterval(interval)
     }, [domain])
 
     if (!data) return (
-        <div className="flex items-center justify-center h-full text-2xl text-muted-foreground animate-pulse">
-            Connecting to {domain} Andon System...
+        <div className="w-full h-48 bg-slate-900/50 rounded-[2rem] border border-slate-800 animate-pulse flex items-center justify-center">
+            <p className="text-slate-500 font-black uppercase tracking-widest text-[10px]">Syncing Machine Map...</p>
         </div>
     )
 
-    const activeColor = (status: string) => {
-        return status === 'IN_PROGRESS'
-            ? "bg-amber-100 border-amber-300 text-amber-900"
-            : "bg-rose-100 border-rose-300 text-rose-900 animate-pulse"
-    }
-
     return (
-        <div className="flex flex-col h-full bg-background">
-            {/* Header */}
-            <div className="bg-primary text-primary-foreground p-6 shadow-md flex justify-between items-center rounded-xl mb-6">
-                <div>
-                    <h1 className="text-4xl font-black tracking-tight uppercase flex items-center gap-3">
-                        <span className="bg-white/20 p-2 rounded-lg"><FaTools /></span>
-                        {data.adminName} Andon
-                    </h1>
-                    <p className="text-primary-foreground/80 font-mono mt-1 text-lg">Live Production Monitor</p>
-                </div>
-                <div className="text-right">
-                    <div className="text-5xl font-mono font-bold tracking-widest">
-                        {format(currentTime, "HH:mm:ss")}
+        <div className="bg-slate-900/40 border border-slate-800 rounded-[2.5rem] overflow-hidden backdrop-blur-md shadow-2xl">
+            {/* Inner Header Card */}
+            <div className="bg-slate-900/60 p-5 border-b border-slate-800 flex justify-between items-center">
+                <div className="flex items-center gap-3">
+                    <div className="bg-blue-600 p-2 rounded-xl shadow-lg shadow-blue-500/20">
+                        <MdMemory className="text-white text-base" />
                     </div>
-                    <div className="text-xl opacity-90 uppercase tracking-widest">
-                        {format(currentTime, "EEEE, dd MMM yyyy")}
+                    <div>
+                        <h2 className="text-sm font-black italic text-white uppercase tracking-tighter leading-none">Global Machine Status</h2>
+                        <p className="text-[9px] font-bold text-slate-500 uppercase tracking-widest mt-1">Real-time Factory Topology</p>
                     </div>
                 </div>
+
+                {/* Legend Mini */}
+                <div className="flex items-center gap-4 text-[8px] font-black uppercase tracking-[0.2em]">
+                    <span className="flex items-center gap-1.5 text-green-500"><MdFiberManualRecord size={10} className="animate-pulse" /> Ready</span>
+                    <span className="flex items-center gap-1.5 text-amber-500"><MdFiberManualRecord size={10} className="animate-pulse" /> In Progress</span>
+                    <span className="flex items-center gap-1.5 text-rose-500"><MdFiberManualRecord size={10} className="animate-ping" /> Urgent</span>
+                </div>
             </div>
 
-            {/* Grid Content */}
+            {/* Area Konten */}
+            <div className="p-6 space-y-8 max-h-[600px] overflow-y-auto custom-scrollbar">
+                {data.map((loc: any) => (
+                    <div key={loc.id} className="relative">
+                        <div className="flex items-center gap-3 mb-4">
+                            <div className="h-[1px] flex-1 bg-gradient-to-r from-slate-800 to-transparent"></div>
+                            <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em] bg-slate-900/80 px-3 py-1 rounded-full border border-slate-800 italic flex items-center gap-2">
+                                <MdLocationOn className="text-blue-500" size={12} />
+                                {loc.name}
+                            </h3>
+                            <div className="h-[1px] flex-1 bg-gradient-to-l from-slate-800 to-transparent"></div>
+                        </div>
 
-
-            {/* Footer Stats */}
-
-        <div className="flex flex-col gap-4">
-          {data.map((loc: any) => (
-              <div key={loc.id} className="grid grid-cols-8 gap-4 rounded-sm border p-4">
-                <h3 className="font-bold">{loc.name}</h3>
-
-                {loc.machines.map((m: any) => {
-                const status = getMachineStatus(m)
-                const bgColor = getBgColor(status)
-                return (
-                    <div
-                    key={m.id}
-                    className={`text-center p-2 border text-xs text-white ${bgColor}`}
-                    >
-                    {String(m.name).toUpperCase()}
+                        <div className="flex gap-4 w-full">
+                            {loc.machines.map((m: any) => {
+                                const status = getMachineStatus(m)
+                                const style = getStatusStyles(status)
+                                return (
+                                    <div
+                                        key={m.id}
+                                        className={`group relative py-2 rounded-lg border flex items-center justify-center transition-all duration-500 w-full ${style}`}
+                                    >
+                                        <span className="text-[9px] font-black z-10">{m.name}</span>
+                                        
+                                        {status !== 'NORMAL' && (
+                                            <div className={`absolute inset-0 rounded-lg blur-md opacity-40 animate-pulse ${status === 'OPEN' ? 'bg-rose-500' : 'bg-amber-500'}`} />
+                                        )}
+                                    </div>
+                                )
+                            })}
+                        </div>
                     </div>
-                )
-            })}
-            </div>
-            ))}
+                ))}
             </div>
 
-
-
+            {/* Footer Card */}
+            <div className="bg-slate-900/60 p-3 px-6 border-t border-slate-800 flex justify-between items-center text-[9px] font-bold text-slate-600">
+                <div className="flex items-center gap-2">
+                    <MdAnalytics className="text-blue-500/50" size={16} />
+                    <span className="uppercase tracking-widest">System Health: Optimal</span>
+                </div>
+                <div className="flex items-center gap-2 uppercase italic">
+                    <MdSettingsInputComponent size={14} className="text-slate-700" />
+                    Total Nodes: {data.reduce((acc: number, curr: any) => acc + curr.machines.length, 0)}
+                </div>
+            </div>
         </div>
     )
 }
 
 function getMachineStatus(m: any) {
-  if (!m.calls || m.calls.length === 0) return "NORMAL"
-
-  const activeCall = m.calls.find(
-    (c: any) => c.status === "OPEN" || c.status === "IN_PROGRESS"
-  )
-
-  if (!activeCall) return "NORMAL"
-
-  return activeCall.status
+    if (!m.calls || m.calls.length === 0) return "NORMAL"
+    const activeCall = m.calls.find((c: any) => c.status === "OPEN" || c.status === "IN_PROGRESS")
+    if (!activeCall) return "NORMAL"
+    return activeCall.status
 }
 
-function getBgColor(status: string) {
-  switch (status) {
-    case "OPEN":
-      return "bg-red-500"
-    case "IN_PROGRESS":
-      return "bg-yellow-500"
-    default:
-      return "bg-green-500"
-  }
+function getStatusStyles(status: string) {
+    switch (status) {
+        case "OPEN":
+            return "bg-rose-600 border-rose-400 text-white z-10 shadow-lg animate-pulse"
+        case "IN_PROGRESS":
+            return "bg-amber-500 border-amber-300 text-white z-10"
+        default:
+            return "bg-green-500/30 border-slate-800 text-slate-50 hover:border-slate-600"
+    }
 }

@@ -3,10 +3,8 @@
 import { useState } from "react";
 import { addTeamMember } from "@/app/actions/team-actions";
 import { useRouter } from "next/navigation";
-import { FaUserPlus } from "react-icons/fa";
-
-import { Input } from "@/app/components/ui/Input";
-import { Button } from "@/app/components/ui/Button";
+import { FaUserPlus, FaCheckCircle, FaExclamationCircle } from "react-icons/fa";
+import { MdOutlineEmail, MdBadge, MdLock, MdWork } from "react-icons/md";
 
 export default function AddTeamForm({ adminId }: { adminId: string }) {
   const router = useRouter();
@@ -30,9 +28,10 @@ export default function AddTeamForm({ adminId }: { adminId: string }) {
     const result = await addTeamMember(data);
 
     if (result.success) {
-      setMessage("✅ Member added successfully!");
+      setMessage("✅ Member baru berhasil ditambahkan ke tim!");
       (e.target as HTMLFormElement).reset();
-      router.refresh(); // Memperbarui list data di server component
+      router.refresh();
+      setTimeout(() => setMessage(""), 5000); // Hilangkan pesan setelah 5 detik
     } else {
       setMessage(`❌ ${result.error}`);
     }
@@ -40,37 +39,99 @@ export default function AddTeamForm({ adminId }: { adminId: string }) {
   }
 
   return (
-    <div className="px-6 py-6 bg-card rounded-lg border border-border mt-4 shadow-sm">
-      <h3 className="font-semibold text-lg text-primary mb-6 flex items-center gap-2">
-        <FaUserPlus className="text-primary" />
-        Add New Team Member
-      </h3>
-      <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-5 gap-4">
-        <Input name="name" placeholder="Full Name" required />
-        <Input name="email" type="email" placeholder="Email Address" required />
-        <Input name="password" type="password" placeholder="Password" required />
-        <div className="relative">
-          <select
-            name="andonRole"
-            required
-            className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-          >
-            <option value="MEKANIK">MEKANIK</option>
-            <option value="QUALITY">QUALITY</option>
-            <option value="MATERIAL">MATERIAL</option>
-          </select>
+    <div className="bg-slate-50 p-6 rounded-3xl border border-slate-200 mb-8 shadow-inner">
+      <div className="flex items-center gap-3 mb-6">
+        <div className="bg-blue-600 p-2 rounded-xl shadow-lg shadow-blue-200">
+          <FaUserPlus className="text-white text-sm" />
         </div>
-        <Button
+        <h3 className="font-black text-slate-800 italic uppercase tracking-tighter">
+          Registrasi Anggota Tim Baru
+        </h3>
+      </div>
+
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          
+          {/* INPUT NAMA */}
+          <div className="relative group">
+            <MdBadge className="absolute left-3 top-3 text-slate-400 group-focus-within:text-blue-600 transition-colors" size={18} />
+            <input 
+              name="name" 
+              placeholder="Nama Lengkap" 
+              required 
+              className="w-full pl-10 pr-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-bold text-slate-700 focus:outline-none focus:ring-4 focus:ring-blue-100 focus:border-blue-600 transition-all"
+            />
+          </div>
+
+          {/* INPUT EMAIL */}
+          <div className="relative group">
+            <MdOutlineEmail className="absolute left-3 top-3 text-slate-400 group-focus-within:text-blue-600 transition-colors" size={18} />
+            <input 
+              name="email" 
+              type="email" 
+              placeholder="Email Perusahaan" 
+              required 
+              className="w-full pl-10 pr-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-bold text-slate-700 focus:outline-none focus:ring-4 focus:ring-blue-100 focus:border-blue-600 transition-all"
+            />
+          </div>
+
+          {/* INPUT PASSWORD */}
+          <div className="relative group">
+            <MdLock className="absolute left-3 top-3 text-slate-400 group-focus-within:text-blue-600 transition-colors" size={18} />
+            <input 
+              name="password" 
+              type="password" 
+              placeholder="Password" 
+              required 
+              className="w-full pl-10 pr-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-bold text-slate-700 focus:outline-none focus:ring-4 focus:ring-blue-100 focus:border-blue-600 transition-all"
+            />
+          </div>
+
+          {/* SELECT ROLE */}
+          <div className="relative group">
+            <MdWork className="absolute left-3 top-3 text-slate-400 group-focus-within:text-blue-600 transition-colors" size={18} />
+            <select
+              name="andonRole"
+              required
+              className="w-full pl-10 pr-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-black text-slate-700 appearance-none focus:outline-none focus:ring-4 focus:ring-blue-100 focus:border-blue-600 transition-all cursor-pointer"
+            >
+              <option value="" disabled selected>Pilih Role</option>
+              <option value="MEKANIK">🔧 MEKANIK</option>
+              <option value="QUALITY">🔍 QUALITY</option>
+              <option value="MATERIAL">📦 MATERIAL</option>
+            </select>
+          </div>
+        </div>
+
+        <button
           disabled={loading}
-          className="w-full font-bold"
+          className="w-full lg:w-max px-8 bg-slate-900 text-white py-3 rounded-xl font-black text-xs uppercase tracking-[0.2em] flex items-center justify-center gap-3 hover:bg-blue-600 shadow-xl shadow-slate-200 transition-all active:scale-[0.98] disabled:opacity-50"
         >
-          {loading ? "Adding..." : "Add Member"}
-        </Button>
+          {loading ? (
+            <div className="flex items-center gap-2">
+              <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+              <span>Memproses...</span>
+            </div>
+          ) : (
+            <>
+              Tambah Anggota <FaUserPlus />
+            </>
+          )}
+        </button>
       </form>
+
+      {/* NOTIFIKASI */}
       {message && (
-        <p className={`text-sm font-medium mt-4 p-2 rounded-md ${message.startsWith('✅') ? 'bg-green-50 text-green-700 border border-green-200' : 'bg-red-50 text-red-700 border border-red-200'}`}>
-          {message}
-        </p>
+        <div className={`mt-6 p-4 rounded-2xl flex items-center gap-3 animate-in fade-in slide-in-from-top-2 ${
+          message.startsWith('✅') 
+          ? 'bg-green-50 border border-green-100 text-green-700' 
+          : 'bg-red-50 border border-red-100 text-red-700'
+        }`}>
+          {message.startsWith('✅') ? <FaCheckCircle /> : <FaExclamationCircle />}
+          <p className="text-sm font-bold uppercase tracking-tight">
+            {message.replace('✅', '').replace('❌', '')}
+          </p>
+        </div>
       )}
     </div>
   );

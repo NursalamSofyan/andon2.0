@@ -6,6 +6,7 @@ import { useRouter, useSearchParams } from "next/navigation"
 import MaxWidthWrapper from "@/app/components/MaxWidthWrapper"
 import Link from "next/link"
 import Image from "next/image"
+import { FaSignInAlt, FaInfoCircle } from "react-icons/fa" // Menggunakan react-icons agar senada
 
 export default function LoginClient() {
   const [email, setEmail] = useState("")
@@ -23,7 +24,7 @@ export default function LoginClient() {
     setIsLoading(true)
 
     if (!email || !password) {
-      setError("Please fill in all fields")
+      setError("Harap isi semua kolom")
       setIsLoading(false)
       return
     }
@@ -35,7 +36,7 @@ export default function LoginClient() {
     })
 
     if (res?.error) {
-      setError("Invalid email or password")
+      setError("Email atau password salah")
       setIsLoading(false)
       return
     }
@@ -45,121 +46,124 @@ export default function LoginClient() {
   }
 
   return (
-    <MaxWidthWrapper className="flex items-center justify-center min-h-screen">
-      <form
-        onSubmit={handleSubmit}
-        className="flex flex-col mx-auto bg-linear-to-b from-blue-500 via-blue-500 to-green-500 rounded-lg border shadow-xl border-green-500  overflow-hidden text-gray-50 max-w-md w-full"
-      >
-        <h1 className="text-2xl font-bold w-full bg-blue-900/40 px-4 py-2">
-          Login
-        </h1>
-        <Link href="/">
-          <Image
-            src="/images/logo_1.jpg"
-            width={300}
-            height={100}
-            alt="scan qr code andonPro"
-            className=" md:h-40 bg-white w-full object-contain"
-          />
-        </Link>
-
-        <div className="flex flex-col p-4 text-gray-800">
-          {/* Error Message */}
-          {error && (
-            <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg mb-4 flex items-start">
-              <svg
-                className="w-5 h-5 mr-2 shrink-0 mt-0.5"
-                fill="currentColor"
-                viewBox="0 0 20 20"
-              >
-                <path
-                  fillRule="evenodd"
-                  d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
-                  clipRule="evenodd"
+    <div className="bg-slate-50 min-h-screen">
+      <MaxWidthWrapper className="flex items-center justify-center min-h-screen">
+        <div className="max-w-md w-full">
+          {/* LOGO AREA */}
+          <div className="flex flex-col items-center mb-8">
+            <Link href="/" className="flex items-center gap-2 mb-2">
+              <div className="bg-blue-600 rounded-lg">
+                <Image
+                  src="/images/logo_1.jpg" // Jika ini logo transparan akan lebih bagus
+                  width={220}
+                  height={100}
+                  alt="andonPro"
+                  className="rounded-sm"
                 />
-              </svg>
-              <span className="text-sm">{error}</span>
-            </div>
-          )}
+              </div>
+            </Link>
+            <p className="text-slate-500 font-medium text-sm">Masuk ke sistem manajemen Andon Anda</p>
+          </div>
 
-          <label className="font-medium mb-1">Email :</label>
-          <input
-            type="email"
-            placeholder="Enter your email"
-            value={email}
-            onChange={(e) => {
-              setEmail(e.target.value);
-              setError(""); // Clear error saat user mulai mengetik
-            }}
-            disabled={isLoading}
-            className="border rounded-full px-4 py-2 bg-white mb-3 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
-            required
-          />
-
-          <label className="font-medium mb-1">Password :</label>
-          <input
-            type="password"
-            placeholder="Enter your password"
-            value={password}
-            onChange={(e) => {
-              setPassword(e.target.value);
-              setError(""); // Clear error saat user mulai mengetik
-            }}
-            disabled={isLoading}
-            className="border rounded-full px-4 py-2 bg-white mb-4 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
-            required
-          />
-
-          <button
-            type="submit"
-            disabled={isLoading}
-            className="bg-blue-700 text-white p-2 rounded-full cursor-pointer hover:bg-blue-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
+          {/* LOGIN CARD */}
+          <form
+            onSubmit={handleSubmit}
+            className="bg-white rounded-3xl border border-slate-200 shadow-xl shadow-slate-200/50 overflow-hidden"
           >
-            {isLoading ? (
-              <>
-                <svg
-                  className="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
+            <div className="p-8">
+              <h1 className="text-2xl font-black text-slate-900 mb-6 tracking-tight">
+                Login
+              </h1>
+
+              {/* Error Message */}
+              {error && (
+                <div className="bg-red-50 border border-red-100 text-red-600 px-4 py-3 rounded-xl mb-6 flex items-center gap-3 animate-in fade-in slide-in-from-top-1">
+                  <FaInfoCircle className="shrink-0" />
+                  <span className="text-sm font-bold">{error}</span>
+                </div>
+              )}
+
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-bold text-slate-700 mb-2">Email :</label>
+                  <input
+                    type="email"
+                    placeholder="nama@perusahaan.com"
+                    value={email}
+                    onChange={(e) => {
+                      setEmail(e.target.value);
+                      setError("");
+                    }}
+                    disabled={isLoading}
+                    className="w-full border border-slate-200 rounded-xl px-4 py-3 bg-white focus:outline-none focus:ring-4 focus:ring-blue-100 focus:border-blue-600 transition-all disabled:opacity-50"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-bold text-slate-700 mb-2">Password :</label>
+                  <input
+                    type="password"
+                    placeholder="••••••••"
+                    value={password}
+                    onChange={(e) => {
+                      setPassword(e.target.value);
+                      setError("");
+                    }}
+                    disabled={isLoading}
+                    className="w-full border border-slate-200 rounded-xl px-4 py-3 bg-white focus:outline-none focus:ring-4 focus:ring-blue-100 focus:border-blue-600 transition-all disabled:opacity-50"
+                    required
+                  />
+                </div>
+
+                <div className="flex justify-end">
+                  <Link
+                    href="/forgot-password"
+                    className="text-sm font-bold text-blue-600 hover:text-blue-800 transition"
+                  >
+                    Lupa password?
+                  </Link>
+                </div>
+
+                <button
+                  type="submit"
+                  disabled={isLoading}
+                  className="w-full bg-blue-600 text-white p-4 rounded-xl font-black text-lg flex items-center justify-center gap-3 hover:bg-blue-700 shadow-lg shadow-blue-200 transition-all active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  <circle
-                    className="opacity-25"
-                    cx="12"
-                    cy="12"
-                    r="10"
-                    stroke="currentColor"
-                    strokeWidth="4"
-                  ></circle>
-                  <path
-                    className="opacity-75"
-                    fill="currentColor"
-                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                  ></path>
-                </svg>
-                Logging in...
-              </>
-            ) : (
-              "Login"
-            )}
-          </button>
+                  {isLoading ? (
+                    <>
+                      <svg className="animate-spin h-5 w-5 text-white" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                      </svg>
+                      <span>Memproses...</span>
+                    </>
+                  ) : (
+                    <>
+                      <span>Masuk</span>
+                      <FaSignInAlt />
+                    </>
+                  )}
+                </button>
+              </div>
+            </div>
 
-          {/* Forgot Password Link */}
-          <Link
-            href="/forgot-password"
-            className="text-center text-sm mt-3 hover:underline cursor-pointer text-blue-100"
-          >
-            Forgot password?
-          </Link>
+            <div className="bg-slate-50 p-6 text-center border-t border-slate-100">
+              <p className="text-sm text-slate-500 font-medium">
+                Belum punya akun?{" "}
+                <Link href="/signup" className="text-blue-600 font-black hover:underline">
+                  Daftar di sini
+                </Link>
+              </p>
+            </div>
+          </form>
+
+          {/* FOOTER INFO */}
+          <p className="mt-8 text-center text-slate-400 text-xs font-medium">
+            &copy; 2024 andonPro Automation. Secure Industrial Connection.
+          </p>
         </div>
-
-        <Link
-          href="/signup"
-          className="text-center text-sm py-2 hover:underline cursor-pointer border-t border-blue-400/30"
-        >
-          Don't have an account yet? Sign up here
-        </Link>
-      </form>
-    </MaxWidthWrapper>
+      </MaxWidthWrapper>
+    </div>
   )
 }
