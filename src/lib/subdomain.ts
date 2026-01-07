@@ -83,41 +83,113 @@ export async function getSubdomainData(domain: string) {
  */
 export async function getSubdomainLink(subdomain: string, path: string = "") {
   const headersList = await headers();
-  const host = headersList.get("host") || ""; // Contoh: "192.168.1.15:3000" atau "sofyan.192.168.1.15:3000"
+  const host = headersList.get("host") || "";
 
   // Tentukan protokol
   const protocol = process.env.NODE_ENV === "production" ? "https" : "http";
 
   let baseDomain = "";
 
+  // 1. PRODUCTION - gunakan ENV atau extract dari host
   if (process.env.NODE_ENV === "production") {
-    // Di produksi, kita ambil root domain dari ENV
-    baseDomain = process.env.NEXT_PUBLIC_ROOT_DOMAIN || "andonpro.com";
-  } else {
-    /**
-     * LOGIKA UNTUK IP / LOCALHOST
-     * Kita harus membuang subdomain yang sedang aktif dari host
-     * misal: dari "sofyan.192.168.1.15:3000" menjadi "192.168.1.15:3000"
-     */
-    const parts = host.split(".");
-    
-    // Jika ada lebih dari 1 titik (misal: sofyan.192.168.1.15:3000), 
-    // maka parts.length akan > 3 (karena IP sendiri punya 3 titik)
-    // Cara paling aman adalah mengambil 4 bagian terakhir jika itu IP, atau 1 bagian terakhir jika itu 'localhost'
-    
-    const isIP = host.match(/\d+\.\d+\.\d+\.\d+/); // Cek apakah host mengandung pola IP
-
-    if (isIP) {
-      // Jika IP, kita ambil IP + Port-nya saja, buang prefix subdomain jika ada
-      baseDomain = isIP[0] + (host.split(":")[1] ? `:${host.split(":")[1]}` : "");
+    // Prioritas: gunakan NEXT_PUBLIC_ROOT_DOMAIN jika ada
+    if (process.env.NEXT_PUBLIC_ROOT_DOMAIN) {
+      baseDomain = process.env.NEXT_PUBLIC_ROOT_DOMAIN;
     } else {
-      // Jika localhost:3000 atau sofyan.localhost:3000
-      baseDomain = parts.length > 1 ? parts.slice(-1)[0] : host;
+      // Extract base domain dari host
+      baseDomain = extractBaseDomain(host);
     }
+  } 
+  // 2. DEVELOPMENT - handle localhost dan IP
+  else {
+    baseDomain = extractBaseDomainDev(host);
   }
 
   const cleanPath = path.startsWith("/") ? path : `/${path}`;
 
-  // Hasil: http://subdomain.192.168.1.15:3000/path
+  // Hasil: protocol://subdomain.baseDomain/path
   return `${protocol}://${subdomain}.${baseDomain}${cleanPath}`;
 }
+
+/**
+ * Extract base domain untuk PRODUCTION
+ * Handles:
+ * - andonpro.vercel.app
+ * - subdomain.andonpro.vercel.app -> andonpro.vercel.app
+ * - andonpro.com
+ * - subdomain.andonpro.com -> andonpro.com
+ */
+function extractBaseDomain(host: string): string {
+  const hostname = host.split(':')[0]; // Remove port
+
+  // Handle Vercel deployments
+  if (hostname.endsWith('.vercel.app')) {
+    const parts = hostname.split('.');
+    
+    // tenant---branch.vercel.app -> vercel.app (edge case)
+    if (hostname.includes('---')) {
+      return 'vercel.app';
+    }
+    
+    // subdomain.andonpro.vercel.app -> andonpro.vercel.app (ambil 3 bagian terakhir)
+    if (parts.length > 3) {
+      return parts.slice(-3).join('.');
+    }
+    
+    // andonpro.vercel.app -> andonpro.vercel.app
+    return hostname;
+  }
+
+  // Handle custom domains (andonpro.com, subdomain.andonpro.com)
+  const parts = hostname.split('.');
+  
+  // subdomain.andonpro.com -> andonpro.com (ambil 2 bagian terakhir)
+  if (parts.length > 2) {
+    return parts.slice(-2).join('.');
+  }
+  
+  // andonpro.com -> andonpro.com
+  return hostname;
+}
+
+/**
+ * Extract base domain untuk DEVELOPMENT
+ * Handles:
+ * - localhost:3000
+ * - subdomain.localhost:3000 -> localhost:3000
+ * - 192.168.1.15:3000
+ * - subdomain.192.168.1.15:3000 -> 192.168.1.15:3000
+ * - subdomain.192.168.1.15.nip.io:3000 -> 192.168.1.15.nip.io:3000
+ */
+function extractBaseDomainDev(host: string): string {
+  const parts = host.split(':');
+  const hostname = parts[0];
+  const port = parts[1] ? `:${parts[1]}` : '';
+
+  // Handle nip.io
+  if (hostname.includes('.nip.io')) {
+    const nipParts = hostname.split('.');
+    // subdomain.192.168.1.15.nip.io -> 192.168.1.15.nip.io (ambil 5 bagian terakhir)
+    if (nipParts.length > 6) {
+      return nipParts.slice(-6).join('.') + port;
+    }
+    return hostname + port;
+  }
+
+  // Handle IP address
+  const ipMatch = hostname.match(/(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})/);
+  if (ipMatch) {
+    return ipMatch[1] + port;
+  }
+
+  // Handle localhost
+  if (hostname.includes('localhost')) {
+    return 'localhost' + port;
+  }
+
+  // Fallback
+  return host;
+}
+
+// Export helper functions untuk testing
+export { extractBaseDomain, extractBaseDomainDev };

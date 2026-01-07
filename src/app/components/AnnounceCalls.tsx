@@ -107,7 +107,7 @@ const speakAnnouncement = (text: string) => {
        <div className={`fixed top-6 right-6 transition-opacity duration-300 ${isRefreshing ? 'opacity-100' : 'opacity-0'}`}>
         <div className="bg-white/80 backdrop-blur-md px-3 py-1.5 rounded-full shadow-sm border border-slate-200 flex items-center gap-2">
           <MdSync className="text-blue-600 animate-spin" size={14} />
-          <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Live Updates...</span>
+          <span className="text-2xl font-bold text-slate-500 uppercase tracking-wider">Live Updates...</span>
         </div>
       </div>
 
@@ -121,25 +121,25 @@ const speakAnnouncement = (text: string) => {
         });
 
         return (
-          <div key={role} className="space-y-4">
+          <div key={role} className="space-y-2">
 
              <div className="w-full bg-white rounded-3xl shadow-sm border border-slate-100 overflow-hidden">
                 <div className="overflow-x-auto">
-                    <table className="w-full text-left border-collapse">
+                    <table className="w-full text-left border-collapse text-4xl">
                         {/* THEAD & TBODY anda */}
                         <tbody className="divide-y divide-slate-50">
                             {sortedCalls.map((call) => (
                                 <tr key={call.id} className="hover:bg-slate-50/50">
-                                    <td className="px-6 py-4">
-                                        <div className={`inline-flex items-center gap-2 px-3 py-1 rounded-full text-[10px] font-black tracking-wider uppercase
+                                    <td className="px-6 py-6">
+                                        <div className={`inline-flex items-center gap-2 px-8 py-1 rounded-full font-black tracking-wider uppercase
                                             ${call.status === 'OPEN' ? 'bg-red-100 text-red-600' : 'bg-amber-100 text-amber-600'}`}>
-                                            {call.status === 'OPEN' ? <RiAlertFill size={12}/> : <RiLoader3Line size={12} className="animate-spin" />}
+                                            {call.status === 'OPEN' ? <RiAlertFill size={30}/> : <RiLoader3Line size={30} className="animate-spin" />}
                                             {call.status}
                                         </div>
                                     </td>
-                                    <td className="px-6 py-4 font-bold uppercase text-sm">{call.machine.location.name}</td>
-                                    <td className="px-6 py-4 text-sm">{call.machine.name}</td>
-                                    <td className="px-6 py-4 font-mono text-sm">
+                                    <td className="px-6 py-4 font-bold uppercase">{call.machine.location.name}</td>
+                                    <td className="px-6 py-4">{call.machine.name}</td>
+                                    <td className="px-6 py-4 font-mono">
                                         {new Date(call.createdAt).toLocaleTimeString('id-ID')}
                                     </td>
                                 </tr>
