@@ -32,9 +32,20 @@ function extractSubdomain(request: NextRequest): string | null {
     return null;
   }
 
-  // 3. Handle preview deployment URLs (tenant---branch-name.vercel.app)
-  if (hostname.includes('---') && hostname.endsWith('.vercel.app')) {
-    return hostname.split('---')[0];
+  // 3. Handle Vercel deployment URLs
+  if (hostname.endsWith('.vercel.app')) {
+    // Format preview: tenant---branch-name.vercel.app
+    if (hostname.includes('---')) {
+      return hostname.split('---')[0];
+    }
+    // Format subdomain biasa: subdomain.project.vercel.app
+    const parts = hostname.split('.');
+    if (parts.length > 3) {
+      // subdomain.andonpro.vercel.app -> return 'subdomain'
+      return parts[0];
+    }
+    // andonpro.vercel.app (no subdomain)
+    return null;
   }
 
   // 4. Production environment
