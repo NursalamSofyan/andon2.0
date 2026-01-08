@@ -8,10 +8,10 @@ export default async function DashboardPage({ params }: { params: Promise<{ doma
     const { domain } = await params
 
     return (
-        <div className="min-h-screen bg-slate-950 p-4 lg:p-6 flex flex-col gap-6 overflow-hidden max-h-screen text-slate-200">
+        <div className="min-h-screen  p-4 lg:p-6 flex flex-col gap-6 overflow-hidden max-h-screen text-slate-200">
             
             {/* TOP HEADER OPERATIONAL */}
-            <div className="flex items-center justify-between bg-slate-900/50 border border-slate-800 p-4 rounded-2xl backdrop-blur-md">
+            <div className="flex items-center justify-between bg-slate-900 border border-slate-800 p-4 rounded-2xl backdrop-blur-md">
                 <div className="flex items-center gap-4">
                     <div className="bg-blue-600 p-2 rounded-xl shadow-lg shadow-blue-500/20">
                         <FaSatelliteDish className="text-white animate-pulse" size={18} />

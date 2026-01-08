@@ -1,5 +1,4 @@
 // app/actions/subdomain.ts
-'use server'
 
 import { prisma } from "@/lib/prisma";
 import { getServerSession } from "next-auth";
@@ -64,18 +63,6 @@ export async function saveUserSubdomain(formData: FormData) {
     redirect(`${protocol}://${domain}.${host}`);
 }
 
-export async function getSubdomainData(domain: string) {
-  return await prisma.user.findFirst({
-    where: { domain },
-    select: {
-      name: true,
-      image: true,
-      status: true,
-      id: true,
-    }
-  });
-}
-
 /**
  * Menghasilkan link absolut ke subdomain tertentu.
  * @param subdomain - Nama subdomain (slug) dari database
@@ -110,86 +97,46 @@ export async function getSubdomainLink(subdomain: string, path: string = "") {
   // Hasil: protocol://subdomain.baseDomain/path
   return `${protocol}://${subdomain}.${baseDomain}${cleanPath}`;
 }
-
-/**
- * Extract base domain untuk PRODUCTION
- * Handles:
- * - andonpro.vercel.app
- * - subdomain.andonpro.vercel.app -> andonpro.vercel.app
- * - andonpro.com
- * - subdomain.andonpro.com -> andonpro.com
- */
-function extractBaseDomain(host: string): string {
-  const hostname = host.split(':')[0]; // Remove port
-
-  // Handle Vercel deployments
+// Fungsi murni (pure functions) tidak perlu 'use server'
+export function extractBaseDomain(host: string): string {
+  const hostname = host.split(':')[0];
   if (hostname.endsWith('.vercel.app')) {
     const parts = hostname.split('.');
-    
-    // tenant---branch.vercel.app -> vercel.app (edge case)
-    if (hostname.includes('---')) {
-      return 'vercel.app';
-    }
-    
-    // subdomain.andonpro.vercel.app -> andonpro.vercel.app (ambil 3 bagian terakhir)
-    if (parts.length > 3) {
-      return parts.slice(-3).join('.');
-    }
-    
-    // andonpro.vercel.app -> andonpro.vercel.app
+    if (hostname.includes('---')) return 'vercel.app';
+    if (parts.length > 3) return parts.slice(-3).join('.');
     return hostname;
   }
-
-  // Handle custom domains (andonpro.com, subdomain.andonpro.com)
   const parts = hostname.split('.');
-  
-  // subdomain.andonpro.com -> andonpro.com (ambil 2 bagian terakhir)
-  if (parts.length > 2) {
-    return parts.slice(-2).join('.');
-  }
-  
-  // andonpro.com -> andonpro.com
+  if (parts.length > 2) return parts.slice(-2).join('.');
   return hostname;
 }
 
-/**
- * Extract base domain untuk DEVELOPMENT
- * Handles:
- * - localhost:3000
- * - subdomain.localhost:3000 -> localhost:3000
- * - 192.168.1.15:3000
- * - subdomain.192.168.1.15:3000 -> 192.168.1.15:3000
- * - subdomain.192.168.1.15.nip.io:3000 -> 192.168.1.15.nip.io:3000
- */
-function extractBaseDomainDev(host: string): string {
+export function extractBaseDomainDev(host: string): string {
   const parts = host.split(':');
   const hostname = parts[0];
   const port = parts[1] ? `:${parts[1]}` : '';
 
-  // Handle nip.io
   if (hostname.includes('.nip.io')) {
     const nipParts = hostname.split('.');
-    // subdomain.192.168.1.15.nip.io -> 192.168.1.15.nip.io (ambil 5 bagian terakhir)
-    if (nipParts.length > 6) {
-      return nipParts.slice(-6).join('.') + port;
-    }
+    if (nipParts.length > 6) return nipParts.slice(-6).join('.') + port;
     return hostname + port;
   }
 
-  // Handle IP address
   const ipMatch = hostname.match(/(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})/);
-  if (ipMatch) {
-    return ipMatch[1] + port;
-  }
-
-  // Handle localhost
-  if (hostname.includes('localhost')) {
-    return 'localhost' + port;
-  }
-
-  // Fallback
+  if (ipMatch) return ipMatch[1] + port;
+  if (hostname.includes('localhost')) return 'localhost' + port;
   return host;
 }
 
-// Export helper functions untuk testing
-export { extractBaseDomain, extractBaseDomainDev };
+// Fungsi pengambilan data (bukan action)
+export async function getSubdomainData(domain: string) {
+  return await prisma.user.findFirst({
+    where: { domain },
+    select: {
+      name: true,
+      image: true,
+      status: true,
+      id: true,
+    }
+  });
+}

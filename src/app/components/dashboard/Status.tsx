@@ -24,13 +24,13 @@ export default function Status({ domain }: { domain: string }) {
     }, [domain])
 
     if (!data) return (
-        <div className="w-full h-48 bg-slate-900/50 rounded-[2rem] border border-slate-800 animate-pulse flex items-center justify-center">
+        <div className="w-full h-48 bg-slate-900/50 rounded-2xl border border-slate-800 animate-pulse flex items-center justify-center">
             <p className="text-slate-500 font-black uppercase tracking-widest text-[10px]">Syncing Machine Map...</p>
         </div>
     )
 
     return (
-        <div className="bg-slate-900/40 border border-slate-800 rounded-[2.5rem] overflow-hidden backdrop-blur-md shadow-2xl">
+        <div className="bg-slate-900 border border-slate-400 rounded-2xl overflow-hidden backdrop-blur-md shadow-2xl">
             {/* Inner Header Card */}
             <div className="bg-slate-900/60 p-5 border-b border-slate-800 flex justify-between items-center">
                 <div className="flex items-center gap-3">
@@ -52,16 +52,17 @@ export default function Status({ domain }: { domain: string }) {
             </div>
 
             {/* Area Konten */}
-            <div className="p-6 space-y-8 max-h-[600px] overflow-y-auto custom-scrollbar">
+
+            <div className="p-2 space-y-2 max-h-150 overflow-y-auto custom-scrollbar bg-zinc-50 grid lg:grid-cols-2 lg:gap-2">
                 {data.map((loc: any) => (
-                    <div key={loc.id} className="relative">
+                    <div key={loc.id} className="relative bg-accent p-4 rounded-xl border-blue-300 border">
                         <div className="flex items-center gap-3 mb-4">
-                            <div className="h-[1px] flex-1 bg-gradient-to-r from-slate-800 to-transparent"></div>
+                            <div className="h-px flex-1 bg-linear-to-r from-slate-800 to-transparent"></div>
                             <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em] bg-slate-900/80 px-3 py-1 rounded-full border border-slate-800 italic flex items-center gap-2">
-                                <MdLocationOn className="text-blue-500" size={12} />
+                                <MdLocationOn className="text-blue-200" size={12} />
                                 {loc.name}
                             </h3>
-                            <div className="h-[1px] flex-1 bg-gradient-to-l from-slate-800 to-transparent"></div>
+                            <div className="h-px flex-1 bg-linear-to-l from-slate-800 to-transparent"></div>
                         </div>
 
                         <div className="flex gap-4 w-full">
@@ -73,7 +74,7 @@ export default function Status({ domain }: { domain: string }) {
                                         key={m.id}
                                         className={`group relative py-2 rounded-lg border flex items-center justify-center transition-all duration-500 w-full ${style}`}
                                     >
-                                        <span className="text-[9px] font-black z-10">{m.name}</span>
+                                        <span className="text-[9px] z-10 uppercase">{m.name}</span>
                                         
                                         {status !== 'NORMAL' && (
                                             <div className={`absolute inset-0 rounded-lg blur-md opacity-40 animate-pulse ${status === 'OPEN' ? 'bg-rose-500' : 'bg-amber-500'}`} />
@@ -85,6 +86,7 @@ export default function Status({ domain }: { domain: string }) {
                     </div>
                 ))}
             </div>
+
 
             {/* Footer Card */}
             <div className="bg-slate-900/60 p-3 px-6 border-t border-slate-800 flex justify-between items-center text-[9px] font-bold text-slate-600">
@@ -115,6 +117,6 @@ function getStatusStyles(status: string) {
         case "IN_PROGRESS":
             return "bg-amber-500 border-amber-300 text-white z-10"
         default:
-            return "bg-green-500/30 border-slate-800 text-slate-50 hover:border-slate-600"
+            return "bg-green-500 border-green-800 text-slate-50 hover:border-green-600 text-gray-900"
     }
 }

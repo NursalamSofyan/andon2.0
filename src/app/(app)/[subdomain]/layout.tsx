@@ -9,8 +9,8 @@ export default async function SubdomainLayout({
 }) {
   const session = await getServerSession(authOptions);  
   return (
-    <div className="subdomain-wrapper bg-slate-950">
-      <main className="bg-slate-950">
+    <div className="subdomain-wrapper">
+      <main className="bg-gray-50">
         {children}
       </main>
     </div>
