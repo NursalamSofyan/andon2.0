@@ -1,5 +1,6 @@
 import React from 'react'
 import Link from 'next/link'
+import Image from 'next/image' // Import Image component Next.js
 // Import icons dari react-icons
 import { 
   FaArrowRight, 
@@ -36,7 +37,7 @@ export default function LandingPage() {
       </nav> */}
 
       {/* HERO SECTION */}
-      <section className="pt-32 pb-20 px-6">
+      <section className="pt-32 pb-20 px-6 overflow-hidden">
         <div className="max-w-7xl mx-auto text-center">
           <div className="inline-flex items-center gap-2 bg-blue-50 text-blue-700 px-4 py-1.5 rounded-full text-sm font-bold mb-6">
             <MdLocalPizza className="animate-pulse" /> Professional Andon System with Ease
@@ -48,7 +49,7 @@ export default function LandingPage() {
           <p className="text-lg md:text-xl text-slate-500 max-w-2xl mx-auto mb-10">
             Teknisi terlambat datang? Data MTTR berantakan? andonPro memberikan visibilitas penuh pada lantai produksi Anda dalam hitungan menit.
           </p>
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-16">
             <Link href="/register" className="w-full sm:w-auto bg-blue-600 text-white px-8 py-4 rounded-xl text-lg font-black flex items-center justify-center gap-3 hover:bg-blue-700 shadow-xl shadow-blue-200 transition">
               Daftarkan Subdomain Anda <FaArrowRight />
             </Link>
@@ -57,26 +58,54 @@ export default function LandingPage() {
             </Link>
           </div>
         </div>
+
+        {/* HERO IMAGE ILLUSTRATION */}
+        <div className="relative max-w-5xl mx-auto">
+          <div className="absolute -top-10 -left-10 w-32 h-32 bg-blue-200 rounded-full mix-blend-multiply filter blur-3xl opacity-50 animate-blob"></div>
+          <div className="absolute -bottom-10 -right-10 w-32 h-32 bg-indigo-200 rounded-full mix-blend-multiply filter blur-3xl opacity-50 animate-blob animation-delay-2000"></div>
+          <div className="relative bg-white/80 backdrop-blur-sm p-3 rounded-[2rem] border border-slate-100 shadow-2xl">
+              <Image 
+                src="/images/hero.png"
+                alt="AndonPro Dashboard Illustration"
+                width={1200}
+                height={600}
+                className="rounded-[1.5rem]"
+                priority
+              />
+          </div>
+        </div>
       </section>
 
       {/* PAIN POINTS SECTION */}
       <section className="py-20 bg-slate-50" id="features">
         <div className="max-w-7xl mx-auto px-6">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl font-black tracking-tight">Solusi untuk Masalah Produksi Anda</h2>
+          </div>
           <div className="grid md:grid-cols-3 gap-12">
             <div className="p-8 bg-white rounded-3xl shadow-sm border border-slate-100 group hover:border-blue-500 transition-colors">
               <FaRegClock className="text-blue-600 mb-6 text-4xl group-hover:scale-110 transition-transform" />
               <h3 className="text-xl font-black mb-4 tracking-tight">Eliminasi Teknisi Terlambat</h3>
               <p className="text-slate-500 leading-relaxed">Notifikasi real-time langsung ke smartphone teknisi. Tidak ada lagi waktu terbuang mencari personil.</p>
+              <div className="mt-6 flex justify-center">
+                <Image src="/" alt="Mobile Alert" width={150} height={150} className="rounded-2xl" />
+              </div>
             </div>
             <div className="p-8 bg-white rounded-3xl shadow-sm border border-slate-100 group hover:border-blue-500 transition-colors">
               <FaChartBar className="text-blue-600 mb-6 text-4xl group-hover:scale-110 transition-transform" />
               <h3 className="text-xl font-black mb-4 tracking-tight">Tracking MTBF & MTTR Otomatis</h3>
               <p className="text-slate-500 leading-relaxed">Lupakan pencatatan manual di kertas. Dapatkan laporan downtime akurat secara instan untuk Lean Management.</p>
+              <div className="mt-6 flex justify-center">
+                <Image src="/" alt="MTTR Chart" width={150} height={150} className="rounded-2xl" />
+              </div>
             </div>
             <div className="p-8 bg-white rounded-3xl shadow-sm border border-slate-100 group hover:border-blue-500 transition-colors">
               <FaShieldAlt className="text-blue-600 mb-6 text-4xl group-hover:scale-110 transition-transform" />
               <h3 className="text-xl font-black mb-4 tracking-tight">Mencegah Downtime Berulang</h3>
               <p className="text-slate-500 leading-relaxed">Analisis data historis untuk melakukan preventive maintenance sebelum mesin benar-benar rusak.</p>
+              <div className="mt-6 flex justify-center">
+                <Image src="/" alt="Preventive Maintenance" width={150} height={150} className="rounded-2xl" />
+              </div>
             </div>
           </div>
         </div>
@@ -90,9 +119,9 @@ export default function LandingPage() {
             <p className="text-slate-500 text-lg">Investasi kecil untuk menyelamatkan jutaan rupiah Production Loss.</p>
           </div>
 
-          <div className="grid md:grid-cols-3 gap-8 items-end">
+          <div className="grid md:grid-cols-3 gap-8 items-end relative z-10">
             {/* TRIAL */}
-            <div className="p-8 rounded-3xl border border-slate-200 hover:shadow-lg transition">
+            <div className="p-8 rounded-3xl border border-slate-200 hover:shadow-lg transition bg-white">
               <h4 className="text-lg font-bold text-slate-400 mb-2 uppercase tracking-widest">Trial</h4>
               <div className="text-4xl font-black mb-6 tracking-tighter text-slate-900">Gratis</div>
               <ul className="space-y-4 mb-8 text-slate-600 font-medium">
@@ -104,11 +133,17 @@ export default function LandingPage() {
             </div>
 
             {/* PRO */}
-            <div className="p-10 rounded-3xl border-2 border-blue-600 bg-white shadow-2xl relative">
+            <div className="p-10 rounded-3xl border-2 border-blue-600 bg-white shadow-2xl relative transform scale-105 z-10">
               <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-blue-600 text-white px-5 py-1.5 rounded-full text-xs font-black uppercase tracking-[0.2em]">Paling Populer</div>
               <h4 className="text-lg font-bold text-blue-600 mb-2 uppercase tracking-widest">Pro Plan</h4>
               <div className="text-5xl font-black mb-1 tracking-tighter">Rp 500k</div>
-              <div className="text-sm font-bold text-slate-400 mb-8">per bulan</div>
+              <div className="text-sm font-bold text-slate-400 mb-6">per bulan</div>
+              
+              {/* Illustration for Pro Plan */}
+              <div className="mb-6 flex justify-center">
+                <Image src="/images/hero.png" alt="Pro Analytics" width={200} height={120} className="rounded-xl shadow-md" />
+              </div>
+
               <ul className="space-y-4 mb-10 text-slate-700 font-medium">
                 <li className="flex items-center gap-3"><IoLocationOutline className="text-blue-600 text-xl" /> 10 Lokasi</li>
                 <li className="flex items-center gap-3"><MdOutlinePrecisionManufacturing className="text-blue-600 text-xl" /> 100 Mesin</li>
@@ -133,12 +168,12 @@ export default function LandingPage() {
             </div>
           </div>
           
-          <div className="mt-12 text-center p-8 bg-blue-50 rounded-3xl border border-blue-100 flex flex-col md:flex-row items-center justify-center gap-4">
-             <MdOutlinePrecisionManufacturing className="text-blue-600 text-3xl" />
-             <p className="text-blue-800 font-bold">
-               Butuh deployment di <strong>Local Server</strong>? 
-               <a href="#" className="ml-2 underline hover:text-blue-600 transition">Klik di sini untuk konsultasi teknis.</a>
-             </p>
+          <div className="mt-12 text-center p-8 bg-blue-50 rounded-3xl border border-blue-100 flex flex-col md:flex-row items-center justify-center gap-4 relative z-0">
+              <MdOutlinePrecisionManufacturing className="text-blue-600 text-3xl" />
+              <p className="text-blue-800 font-bold">
+                Butuh deployment di <strong>Local Server</strong>? 
+                <a href="" className="ml-2 underline hover:text-blue-600 transition">Klik di sini untuk konsultasi teknis.</a>
+              </p>
           </div>
         </div>
       </section>
